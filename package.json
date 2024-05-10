@@ -1,0 +1,19 @@
+{
+  "name": "logistics_tracking_backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hemant-sudhanshu/logistics-tracking-backend.git"
+  },
+  "author": "Hemant",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hemant-sudhanshu/logistics-tracking-backend/issues"
+  },
+  "homepage": "https://github.com/hemant-sudhanshu/logistics-tracking-backend#readme"
+}
