@@ -1,7 +1,14 @@
 import express from "express";
-import { handleUserSignUp, handleUserLogin } from "../controllers/user.js";
+import {
+  handleUserSignUp,
+  handleUserLogin,
+  handleUserProfile,
+} from "../controllers/user.js";
 
-export const router = express.Router();
+const userRouter = express.Router();
 
-router.post("/signup", handleUserSignUp);
-router.post("/login", handleUserLogin);
+userRouter.post("/signup", handleUserSignUp);
+userRouter.post("/login", handleUserLogin);
+userRouter.get("/profile", handleUserProfile);
+
+export default userRouter;

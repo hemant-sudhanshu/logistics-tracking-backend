@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import { User } from "../models/user.js";
-import { setUser } from "../services/auth.js";
+import { setUser, getUser } from "../services/auth.js";
 
 const validateEmail = async (email) => {
   const user = await User.findOne({ email });
@@ -11,8 +11,26 @@ const validatePassword = (password) => {
   return password && password.length >= 8;
 };
 
+const extractToken = (req) => {
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.split(" ")[0] === "Bearer"
+  ) {
+    return req.headers.authorization.split(" ")[1];
+  } else {
+    return null;
+  }
+};
+
 const handleBadRequest = (res, message) => {
   return res.status(400).json({
+    success: false,
+    message: message,
+  });
+};
+
+const handleUnauthorizedRequest = (res, message) => {
+  return res.status(401).json({
     success: false,
     message: message,
   });
@@ -27,11 +45,20 @@ const handleInternalServerError = (res, error) => {
 
 export const handleUserSignUp = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { firstName, lastName, email, password } = req.body;
 
     // Validate Name
-    if (!name || name.length < 3) {
-      return handleBadRequest(res, "Name should be at least 3 characters.");
+    if (!firstName || firstName.length < 3) {
+      return handleBadRequest(
+        res,
+        "First name should be at least 3 characters."
+      );
+    }
+    if (!lastName || lastName.length < 3) {
+      return handleBadRequest(
+        res,
+        "Last name should be at least 3 characters."
+      );
     }
 
     // validate the email
@@ -55,7 +82,8 @@ export const handleUserSignUp = async (req, res) => {
     // create a new user
 
     const user = await User.create({
-      name,
+      firstName,
+      lastName,
       email,
       password: hashedPassword,
     });
@@ -114,7 +142,8 @@ export const handleUserLogin = async (req, res) => {
       res.cookie("token", token);
 
       let result = {
-        name: user.name,
+        firstName: user.firstName,
+        lastName: user.lastName,
         role: user.role,
         email: user.email,
       };
@@ -131,6 +160,40 @@ export const handleUserLogin = async (req, res) => {
         message: "Incorrect password.",
       });
     }
+  } catch (error) {
+    return handleInternalServerError(res, error);
+  }
+};
+
+export const handleUserProfile = async (req, res) => {
+  try {
+    //Extract token from the request header
+    const token = extractToken(req);
+
+    // Handle unauthorized access
+    if (!token) {
+      return handleUnauthorizedRequest(res, "Unauthorized access.");
+    }
+
+    // Verify token
+    const user = getUser(token);
+    if (!user) {
+      return handleUnauthorizedRequest(res, "Unauthorized access.");
+    }
+
+    // Create user JSON object
+    let result = {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+      email: user.email,
+    };
+
+    return res.status(200).json({
+      success: true,
+      message: "Success.",
+      data: result,
+    });
   } catch (error) {
     return handleInternalServerError(res, error);
   }

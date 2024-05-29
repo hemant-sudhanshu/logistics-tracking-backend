@@ -1,5 +1,10 @@
 import mongoose from "mongoose";
 
-export async function connectToMongoDb(url) {
-  return mongoose.connect(url);
-}
+export const connectToMongoDb = async (url) => {
+  try {
+    const res = await mongoose.connect(url);
+    console.log(`DB connected : ${res.connection.host}`);
+  } catch (error) {
+    return error;
+  }
+};

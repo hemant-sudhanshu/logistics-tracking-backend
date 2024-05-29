@@ -5,12 +5,13 @@ export function setUser(user) {
   return jwt.sign(
     {
       _id: user._id,
-      name: user.name,
+      firstName: user.firstName,
+      lastName: user.lastName,
       email: user.email,
       role: user.role,
     },
     process.env.APP_SECRET,
-    { expiresIn: 1200 }
+    { expiresIn: "7d" }
   );
 }
 
