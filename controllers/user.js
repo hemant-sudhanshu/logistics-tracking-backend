@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import { User } from "../models/user.js";
-import { setUser, getUser } from "../services/auth.js";
+import { setUser, getUser, extractToken } from "../services/tokenService.js";
 
 const validateEmail = async (email) => {
   const user = await User.findOne({ email });
@@ -11,16 +11,7 @@ const validatePassword = (password) => {
   return password && password.length >= 8;
 };
 
-const extractToken = (req) => {
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.split(" ")[0] === "Bearer"
-  ) {
-    return req.headers.authorization.split(" ")[1];
-  } else {
-    return null;
-  }
-};
+
 
 const handleBadRequest = (res, message) => {
   return res.status(400).json({
