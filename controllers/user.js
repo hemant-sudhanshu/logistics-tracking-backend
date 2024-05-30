@@ -1,6 +1,12 @@
 import bcrypt from "bcrypt";
 import { User } from "../models/user.js";
 import { setUser, getUser, extractToken } from "../services/tokenService.js";
+import {
+  handleBadRequest,
+  handleInternalServerError,
+  handleUnauthorizedRequest,
+  handleNotFoundRequest,
+} from "../services/errorHandler.js";
 
 const validateEmail = async (email) => {
   const user = await User.findOne({ email });
@@ -11,28 +17,6 @@ const validatePassword = (password) => {
   return password && password.length >= 8;
 };
 
-
-
-const handleBadRequest = (res, message) => {
-  return res.status(400).json({
-    success: false,
-    message: message,
-  });
-};
-
-const handleUnauthorizedRequest = (res, message) => {
-  return res.status(401).json({
-    success: false,
-    message: message,
-  });
-};
-
-const handleInternalServerError = (res, error) => {
-  return res.status(500).json({
-    success: false,
-    message: error.message,
-  });
-};
 
 export const handleUserSignUp = async (req, res) => {
   try {
@@ -117,10 +101,7 @@ export const handleUserLogin = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "Email address is not found.",
-      });
+      return handleNotFoundRequest(res, "Email address is not found.");
     }
 
     // That means the user is existing and trying to signin from the right portal
