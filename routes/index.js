@@ -5,6 +5,6 @@ import shipmentRouter from "./shipment.js";
 const router = express.Router();
 
 router.use("/user", userRouter);
-router.use("/shipment", shipmentRouter);
+router.use("/shipments", shipmentRouter);
 
 export default router;
