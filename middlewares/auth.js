@@ -19,6 +19,6 @@ export const auth = (req, res, next) => {
     else return handleUnauthorizedRequest(res, "Access denied.");
   } catch (err) {
     // Handle error for invalid token
-    return handleBadRequest(res, "Invalid token!");
+    return handleBadRequest(res, "Invalid token!"); 
   }
 };

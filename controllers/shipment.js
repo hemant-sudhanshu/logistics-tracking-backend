@@ -8,7 +8,6 @@ import { Shipment } from "../models/shipment.js";
 
 const isShipmentNotExists = async (id) => {
   const shipment = await Shipment.findOne({ shipmentId: id });
-  console.log(`shipment: ${JSON.stringify(shipment)}`);
   return shipment ? false : true;
 };
 
@@ -26,6 +25,27 @@ export const handleGetShipments = async (req, res) => {
       success: true,
       message: "Success.",
       data: shipments,
+    });
+  } catch (error) {
+    return handleInternalServerError(res, error);
+  }
+};
+
+export const handleGetShipmentDetails = async (req, res) => {
+  try {
+    var id = req.params.id;
+    const shipments = await Shipment.find({ _id: id });
+    if (!shipments || !shipments[0]) {
+      return res.status(404).json({
+        success: false,
+        message: "No shipments found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Success.",
+      data: shipments[0],
     });
   } catch (error) {
     return handleInternalServerError(res, error);

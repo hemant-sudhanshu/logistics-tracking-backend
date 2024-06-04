@@ -1,6 +1,7 @@
 import express from "express";
 import {
   handleGetShipments,
+  handleGetShipmentDetails,
   handleAddShipment,
   handleUpdateShipment,
 } from "../controllers/shipment.js";
@@ -10,6 +11,7 @@ const shipmentRouter = express.Router();
 
 shipmentRouter.get("/", auth, handleGetShipments);
 shipmentRouter.post("/", auth, handleAddShipment);
+shipmentRouter.get("/:id", auth, handleGetShipmentDetails);
 shipmentRouter.patch("/:id", auth, handleUpdateShipment);
 
 export default shipmentRouter;

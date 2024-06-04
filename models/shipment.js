@@ -23,17 +23,36 @@ const shipmentSchema = new Schema(
     status: {
       type: String,
       required: true,
-      default: "transit",
-      enum: ["transit", "delivered", "delayed"],
+      default: "Transit",
+      enum: ["Transit", "Delivered", "Delayed"],
     },
     isIncoming: {
       type: Boolean,
       default: false,
     },
     date: { type: Date, default: Date.now },
-    deliveryDate: { type: Date },
+    deliveryDate: { type: Date, required: true },
     notes: String,
     instructions: String,
+    houseNo: {
+      type: String,
+      required: true,
+    },
+    address1: {
+      type: String,
+      required: true,
+    },
+    address2: {
+      type: String,
+    },
+    destinationState: {
+      type: String,
+      required: true,
+    },
+    destinationPincode: {
+      type: String,
+      required: true,
+    },
   },
   { timestamps: true }
 );
