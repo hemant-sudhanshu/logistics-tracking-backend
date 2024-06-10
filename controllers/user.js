@@ -7,38 +7,49 @@ import {
   handleUnauthorizedRequest,
   handleNotFoundRequest,
 } from "../services/errorHandler.js";
+import { strings } from "../constants/strings.js";
 
+const { validations, messages } = strings;
+
+/**
+ * Validates if the given email is not already registered.
+ * @param {string} email - The email to validate.
+ * @returns {Promise<boolean>} - Returns true if email is not registered, false otherwise.
+ */
 const validateEmail = async (email) => {
   const user = await User.findOne({ email });
   return user ? false : true;
 };
 
+/**
+ * Validate if the password meets the required length.
+ * @param {string} password - User's password.
+ * @returns {boolean} - Returns true if password is valid, otherwise false.
+ */
 const validatePassword = (password) => {
   return password && password.length >= 8;
 };
 
-
+/**
+ * Handle user signup process.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 export const handleUserSignUp = async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body;
 
     // Validate Name
     if (!firstName || firstName.length < 3) {
-      return handleBadRequest(
-        res,
-        "First name should be at least 3 characters."
-      );
+      return handleBadRequest(res, validations.firstName3Characters);
     }
     if (!lastName || lastName.length < 3) {
-      return handleBadRequest(
-        res,
-        "Last name should be at least 3 characters."
-      );
+      return handleBadRequest(res, validations.lastName3Characters);
     }
 
-    // validate the email
+    // validate email
     if (!email) {
-      return handleBadRequest(res, "Email is required.");
+      return handleBadRequest(res, validations.emailRequired);
     }
 
     const isEmailNotRegistered = await validateEmail(email);
@@ -54,8 +65,7 @@ export const handleUserSignUp = async (req, res) => {
     // Hash password using bcrypt
     const hashedPassword = await bcrypt.hash(password, 8);
 
-    // create a new user
-
+    // Create a new user
     const user = await User.create({
       firstName,
       lastName,
@@ -76,7 +86,7 @@ export const handleUserSignUp = async (req, res) => {
       success: true,
       token: token,
       expiresIn: 1200,
-      message: "You are successfully registered.",
+      message: messages.registeredSuccessfully,
       data: result,
     });
   } catch (error) {
@@ -84,36 +94,41 @@ export const handleUserSignUp = async (req, res) => {
   }
 };
 
+/**
+ * Handle user login process.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 export const handleUserLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     // validate the email
     if (!email) {
-      return handleBadRequest(res, "Email is required.");
+      return handleBadRequest(res, validations.emailRequired);
     }
 
     // Validate Password
     if (!password) {
-      return handleBadRequest(res, "Password is required.");
+      return handleBadRequest(res, validations.passwordRequired);
     }
 
     const user = await User.findOne({ email });
 
     if (!user) {
-      return handleNotFoundRequest(res, "Email address is not found.");
+      return handleNotFoundRequest(res, validations.emailNotFound);
     }
 
     // That means the user is existing and trying to signin from the right portal
     // Now check if the password match
-    let isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.password);
 
     if (isMatch) {
       // if the password match Sign a the token and issue it to the user
-      let token = setUser(user);
+      const token = setUser(user);
       res.cookie("token", token);
 
-      let result = {
+      const result = {
         firstName: user.firstName,
         lastName: user.lastName,
         role: user.role,
@@ -124,12 +139,12 @@ export const handleUserLogin = async (req, res) => {
         success: true,
         token: `${token}`,
         expiresIn: 1200,
-        message: "You are now logged in.",
+        message: messages.loggedIn,
         data: result,
       });
     } else {
       return res.status(403).json({
-        message: "Incorrect password.",
+        message: validations.incorrectPassword,
       });
     }
   } catch (error) {
@@ -137,6 +152,11 @@ export const handleUserLogin = async (req, res) => {
   }
 };
 
+/**
+ * Handle fetching the user's profile.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 export const handleUserProfile = async (req, res) => {
   try {
     //Extract token from the request header
@@ -144,13 +164,13 @@ export const handleUserProfile = async (req, res) => {
 
     // Handle unauthorized access
     if (!token) {
-      return handleUnauthorizedRequest(res, "Unauthorized access.");
+      return handleUnauthorizedRequest(res, messages.unauthorizedAccess);
     }
 
     // Verify token
     const user = getUser(token);
     if (!user) {
-      return handleUnauthorizedRequest(res, "Unauthorized access.");
+      return handleUnauthorizedRequest(res, messages.unauthorizedAccess);
     }
 
     // Create user JSON object
@@ -163,7 +183,7 @@ export const handleUserProfile = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Success.",
+      message: messages.success,
       data: result,
     });
   } catch (error) {
