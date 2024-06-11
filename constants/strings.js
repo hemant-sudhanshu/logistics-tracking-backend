@@ -14,7 +14,7 @@ export const strings = {
     emailNotFound: "Email address is not found.",
     passwordRequired: "Password is required.",
     password8Characters: "Password should be at least 8 characters.",
-    incorrectPassword: "You are now logged in.",
+    incorrectPassword: "Incorrect password.",
   },
   messages: {
     invalidToken: "Invalid token!",
