@@ -1,13 +1,13 @@
 import bcrypt from "bcrypt";
-import { User } from "../models/user.js";
-import { setUser, getUser, extractToken } from "../services/tokenService.js";
+import { User } from "../../models/user.js";
+import { setUser, getUser, extractToken } from "../../services/tokenService.js";
 import {
   handleBadRequest,
   handleInternalServerError,
   handleUnauthorizedRequest,
   handleNotFoundRequest,
-} from "../services/errorHandler.js";
-import { strings } from "../constants/strings.js";
+} from "../../services/errorHandler.js";
+import { strings } from "../../constants/strings.js";
 
 const { validations, messages } = strings;
 

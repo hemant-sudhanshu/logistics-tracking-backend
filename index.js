@@ -4,7 +4,7 @@ import "dotenv/config";
 
 import { connectToMongoDb } from "./connect.js";
 
-import router from "./routes/index.js";
+import router from "./v1/routes/index.js";
 
 const app = express();
 const PORT = 8000;
@@ -15,7 +15,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // Routes
-app.use("/api", router);
+// v1 router add more routes later
+app.use("/api/v1", router);
 
 // DB Connection
 connectToMongoDb(process.env.MONGODB_URL)

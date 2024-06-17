@@ -5,9 +5,10 @@ import {
   handleAddShipment,
   handleUpdateShipment,
 } from "../controllers/shipment.js";
-import { auth } from "../middlewares/auth.js";
+import { auth } from "../../middlewares/auth.js";
 
 const shipmentRouter = express.Router();
+auth;
 
 shipmentRouter.get("/", auth, handleGetShipments);
 shipmentRouter.post("/", auth, handleAddShipment);

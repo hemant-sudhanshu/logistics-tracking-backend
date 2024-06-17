@@ -1,11 +1,11 @@
 import {
   handleBadRequest,
   handleInternalServerError,
-} from "../services/errorHandler.js";
+} from "../../services/errorHandler.js";
 
-import { Shipment } from "../models/shipment.js";
-import { getSubtractedDateFromCurrent } from "../utils/dateUtils.js";
-import { strings } from "../constants/strings.js";
+import { Shipment } from "../../models/shipment.js";
+import { getSubtractedDateFromCurrent } from "../../utils/dateUtils.js";
+import { strings } from "../../constants/strings.js";
 
 const { common, filters, sortOptions, shipmentMessages } = strings;
 
