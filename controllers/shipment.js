@@ -7,7 +7,7 @@ import { Shipment } from "../models/shipment.js";
 import { getSubtractedDateFromCurrent } from "../utils/dateUtils.js";
 import { strings } from "../constants/strings.js";
 
-const { filters, shipmentMessages } = strings;
+const { common, filters, sortOptions, shipmentMessages } = strings;
 
 /**
  * Checks if a shipment with the given ID does not exist.
@@ -27,20 +27,20 @@ const isShipmentNotExists = async (id) => {
  */
 export const handleGetShipments = async (req, res) => {
   try {
-    const { isIncoming, filter, sort } = req.query;
+    const { type, timeStamp, sortby } = req.query;
 
     const query = {};
-    if (isIncoming) {
-      query.isIncoming = isIncoming;
+    if (type && (type === common.incoming || type === common.outgoing)) {
+      query.isIncoming = type === common.incoming;
     }
 
-    if (filter && filter !== filters.all) {
+    if (timeStamp && timeStamp !== filters.all) {
       let dateStr;
-      if (filter === filters.lastWeek) {
+      if (timeStamp === filters.lastWeek) {
         dateStr = getSubtractedDateFromCurrent({ days: 7 }).toISOString();
-      } else if (filter === filters.lastMonth) {
+      } else if (timeStamp === filters.lastMonth) {
         dateStr = getSubtractedDateFromCurrent({ months: 1 }).toISOString();
-      } else if (filter === filters.lastYear) {
+      } else if (timeStamp === filters.lastYear) {
         dateStr = getSubtractedDateFromCurrent({ years: 1 }).toISOString();
       }
       if (dateStr) {
@@ -49,8 +49,9 @@ export const handleGetShipments = async (req, res) => {
     }
 
     let sortQuery;
-    if (sort) {
-      sortQuery = JSON.parse(sort);
+    if (sortby) {
+      const sortObj = sortOptions.find((item) => item.key === sortby);
+      sortQuery = sortObj.value;
     }
     const shipments = await Shipment.find(query).sort(sortQuery);
 
