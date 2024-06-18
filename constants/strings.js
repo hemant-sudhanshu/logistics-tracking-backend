@@ -67,5 +67,18 @@ export const strings = {
     addedSuccussfully: "Shipment added successfully.",
     updatedSuccessfully: "Shipment updated successfully.",
     alreadyAdded: "Shipment is already added.",
+    statusRequired: "Status is required",
+    actionRequired: "Action is required",
+    invalidStatus: "Invaid shipment status",
   },
+
+  shipmentStatuses: [
+    "initiated",
+    "processed",
+    "picked",
+    "delivered",
+    "delayed",
+  ],
+
+  userRoles: ["partner", "admin", "warehouse", "deliveryAgent"],
 };

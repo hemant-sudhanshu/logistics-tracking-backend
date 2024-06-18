@@ -1,5 +1,28 @@
 import mongoose from "mongoose";
+import { strings } from "../constants/strings.js";
+import { addressSchema } from "./address.js";
 const { Schema } = mongoose;
+
+const { shipmentStatuses } = strings;
+
+// Define the schema for the shipmentActions sub-document
+const shipmentActionSchema = new mongoose.Schema(
+  {
+    action: {
+      type: String,
+      required: true,
+    },
+    updatedBy: {
+      type: String,
+      required: true,
+    },
+    location: {
+      type: String,
+      required: true,
+    },
+  },
+  { timestamps: true }
+);
 
 const shipmentSchema = new Schema(
   {
@@ -12,19 +35,11 @@ const shipmentSchema = new Schema(
       type: String,
       required: true,
     },
-    origin: {
-      type: String,
-      required: true,
-    },
-    destination: {
-      type: String,
-      required: true,
-    },
     status: {
       type: String,
       required: true,
-      default: "Transit",
-      enum: ["Transit", "Delivered", "Delayed"],
+      default: shipmentStatuses[0],
+      enum: shipmentStatuses,
     },
     isIncoming: {
       type: Boolean,
@@ -34,27 +49,22 @@ const shipmentSchema = new Schema(
     deliveryDate: { type: Date, required: true },
     notes: String,
     instructions: String,
-    houseNo: {
-      type: String,
+    originAddress: {
+      type: addressSchema,
       required: true,
     },
-    address1: {
-      type: String,
+    destinationAddress: {
+      type: addressSchema,
       required: true,
     },
-    address2: {
-      type: String,
-    },
-    destinationState: {
-      type: String,
-      required: true,
-    },
-    destinationPincode: {
-      type: String,
-      required: true,
-    },
+
+    createdBy: { type: mongoose.Types.ObjectId, ref: "User", required: true },
+    updatedBy: { type: mongoose.Types.ObjectId, ref: "User", required: true },
+
+    actions: [shipmentActionSchema],
   },
   { timestamps: true }
 );
+
 
 export const Shipment = mongoose.model("shipment", shipmentSchema);
