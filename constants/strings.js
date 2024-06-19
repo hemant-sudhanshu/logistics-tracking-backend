@@ -1,9 +1,43 @@
 export const strings = {
   filters: {
-    all: "All",
-    lastWeek: "Last Week",
-    lastMonth: "Last Month",
-    lastYear: "Last Year",
+    all: "all",
+    lastWeek: "lastWeek",
+    lastMonth: "lastMonth",
+    lastYear: "lastYear",
+  },
+
+  sortOptions: [
+    {
+      key: "date-desc",
+      value: { date: -1 },
+    },
+
+    {
+      key: "date-asc",
+      value: { date: 1 },
+    },
+    {
+      key: "title-desc",
+      value: { title: -1 },
+    },
+    {
+      key: "title-asc",
+      value: { title: 1 },
+    },
+    {
+      key: "shipmentId-desc",
+      value: { shipmentId: -1 },
+    },
+    {
+      key: "shipmentId-asc",
+      value: { shipmentId: 1 },
+    },
+  ],
+
+  common: {
+    all: "all",
+    incoming: "incoming",
+    outgoing: "outgoing",
   },
 
   validations: {
@@ -14,7 +48,7 @@ export const strings = {
     emailNotFound: "Email address is not found.",
     passwordRequired: "Password is required.",
     password8Characters: "Password should be at least 8 characters.",
-    incorrectPassword: "You are now logged in.",
+    incorrectPassword: "Incorrect password.",
   },
   messages: {
     invalidToken: "Invalid token!",
@@ -33,5 +67,18 @@ export const strings = {
     addedSuccussfully: "Shipment added successfully.",
     updatedSuccessfully: "Shipment updated successfully.",
     alreadyAdded: "Shipment is already added.",
+    statusRequired: "Status is required",
+    actionRequired: "Action is required",
+    invalidStatus: "Invaid shipment status",
   },
+
+  shipmentStatuses: [
+    "initiated",
+    "processed",
+    "picked",
+    "delivered",
+    "delayed",
+  ],
+
+  userRoles: ["partner", "admin", "warehouse", "deliveryAgent"],
 };

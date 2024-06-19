@@ -18,6 +18,7 @@ export const setUser = (user) => {
     lastName: user.lastName,
     email: user.email,
     role: user.role,
+    address: user.address,
   };
   const options = { expiresIn: "7d" };
 

@@ -1,13 +1,14 @@
 import {
   handleBadRequest,
   handleInternalServerError,
-} from "../services/errorHandler.js";
+} from "../../services/errorHandler.js";
 
-import { Shipment } from "../models/shipment.js";
-import { getSubtractedDateFromCurrent } from "../utils/dateUtils.js";
-import { strings } from "../constants/strings.js";
+import { Shipment } from "../../models/shipment.js";
+import { getSubtractedDateFromCurrent } from "../../utils/dateUtils.js";
+import { strings } from "../../constants/strings.js";
 
-const { filters, shipmentMessages } = strings;
+const { common, filters, sortOptions, shipmentMessages, shipmentStatuses } =
+  strings;
 
 /**
  * Checks if a shipment with the given ID does not exist.
@@ -27,20 +28,20 @@ const isShipmentNotExists = async (id) => {
  */
 export const handleGetShipments = async (req, res) => {
   try {
-    const { isIncoming, filter, sort } = req.query;
+    const { type, timeStamp, sortby } = req.query;
 
     const query = {};
-    if (isIncoming) {
-      query.isIncoming = isIncoming;
+    if (type && (type === common.incoming || type === common.outgoing)) {
+      query.isIncoming = type === common.incoming;
     }
 
-    if (filter && filter !== filters.all) {
+    if (timeStamp && timeStamp !== filters.all) {
       let dateStr;
-      if (filter === filters.lastWeek) {
+      if (timeStamp === filters.lastWeek) {
         dateStr = getSubtractedDateFromCurrent({ days: 7 }).toISOString();
-      } else if (filter === filters.lastMonth) {
+      } else if (timeStamp === filters.lastMonth) {
         dateStr = getSubtractedDateFromCurrent({ months: 1 }).toISOString();
-      } else if (filter === filters.lastYear) {
+      } else if (timeStamp === filters.lastYear) {
         dateStr = getSubtractedDateFromCurrent({ years: 1 }).toISOString();
       }
       if (dateStr) {
@@ -49,8 +50,9 @@ export const handleGetShipments = async (req, res) => {
     }
 
     let sortQuery;
-    if (sort) {
-      sortQuery = JSON.parse(sort);
+    if (sortby) {
+      const sortObj = sortOptions.find((item) => item.key === sortby);
+      sortQuery = sortObj.value;
     }
     const shipments = await Shipment.find(query).sort(sortQuery);
 
@@ -104,7 +106,12 @@ export const handleGetShipmentDetails = async (req, res) => {
  */
 export const handleAddShipment = async (req, res) => {
   try {
-    const reqObj = req.body;
+    const reqObj = {
+      ...req.body,
+      createdBy: req.user._id,
+      updatedBy: req.user._id,
+      originAddress: req.user.address,
+    };
 
     const isShipmentNotExist = await isShipmentNotExists(reqObj.shipmentId);
 
@@ -132,10 +139,71 @@ export const handleAddShipment = async (req, res) => {
  */
 export const handleUpdateShipment = async (req, res) => {
   try {
-    var updateObject = req.body;
+    var updateObject = {
+      ...req.body,
+      updatedBy: req.user._id,
+    };
     const { id } = req.params;
 
-    // fiand and update a shipment
+    const status = updateObject.status;
+    if (status) {
+      // Check
+      const index = shipmentStatuses.indexOf(status);
+      if (index === -1)
+        return handleBadRequest(res, shipmentMessages.invalidStatus);
+    }
+
+    // find and update a shipment
+    const shipment = await Shipment.findByIdAndUpdate(id, updateObject, {
+      new: true,
+    });
+
+    if (!shipment) {
+      return handleNotFoundRequest(res, shipmentMessages.notFound);
+    }
+    return res.status(200).json({
+      success: true,
+      message: shipmentMessages.updatedSuccessfully,
+      data: shipment,
+    });
+  } catch (error) {
+    return handleInternalServerError(res, error);
+  }
+};
+
+/**
+ * Handles updating an existing shipment by ID.
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ */
+export const handleAddShipmentAction = async (req, res) => {
+  try {
+    var { status, action } = req.body;
+    const { id } = req.params;
+
+    if (!status) {
+      return handleBadRequest(res, shipmentMessages.statusRequired);
+    } else {
+      // Check
+      const index = shipmentStatuses.indexOf(status);
+      if (index === -1)
+        return handleBadRequest(res, shipmentMessages.invalidStatus);
+    }
+
+    if (!action) {
+      return handleBadRequest(res, shipmentMessages.actionRequired);
+    }
+
+    // find and update a shipment
+    const existingShipment = await Shipment.findById(id);
+    const newAactions = [...existingShipment.actions, action];
+
+    const updateObject = {
+      status: status,
+      actions: newAactions,
+      updatedBy: req.user._id,
+    };
+
     const shipment = await Shipment.findByIdAndUpdate(id, updateObject, {
       new: true,
     });
