@@ -1,4 +1,8 @@
 import mongoose from "mongoose";
+import { strings } from "../constants/strings.js";
+import { addressSchema } from "./address.js";
+
+const { userRoles } = strings;
 
 const userSchema = new mongoose.Schema(
   {
@@ -18,12 +22,15 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       required: true,
-      default: "team",
-      enum: ["team", "admin"],
+      default: userRoles[0],
+      enum: userRoles,
     },
     password: {
       type: String,
       required: true,
+    },
+    address: {
+      type: addressSchema,
     },
   },
   { timestamps: true }

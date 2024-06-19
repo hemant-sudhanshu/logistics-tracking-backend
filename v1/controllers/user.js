@@ -1,15 +1,15 @@
 import bcrypt from "bcrypt";
-import { User } from "../models/user.js";
-import { setUser, getUser, extractToken } from "../services/tokenService.js";
+import { User } from "../../models/user.js";
+import { setUser, getUser, extractToken } from "../../services/tokenService.js";
 import {
   handleBadRequest,
   handleInternalServerError,
   handleUnauthorizedRequest,
   handleNotFoundRequest,
-} from "../services/errorHandler.js";
-import { strings } from "../constants/strings.js";
+} from "../../services/errorHandler.js";
+import { strings } from "../../constants/strings.js";
 
-const { validations, messages } = strings;
+const { validations, messages, userRoles } = strings;
 
 /**
  * Validates if the given email is not already registered.
@@ -37,7 +37,7 @@ const validatePassword = (password) => {
  */
 export const handleUserSignUp = async (req, res) => {
   try {
-    const { firstName, lastName, email, password } = req.body;
+    const { firstName, lastName, email, password, role, address } = req.body;
 
     // Validate Name
     if (!firstName || firstName.length < 3) {
@@ -65,29 +65,27 @@ export const handleUserSignUp = async (req, res) => {
     // Hash password using bcrypt
     const hashedPassword = await bcrypt.hash(password, 8);
 
+    const newRole = role ? role : userRoles[0];
+
     // Create a new user
     const user = await User.create({
       firstName,
       lastName,
       email,
       password: hashedPassword,
+      role: newRole,
+      address,
     });
 
     const token = setUser(user);
     res.cookie("token", token);
-
-    const result = {
-      name: user.name,
-      role: user.role,
-      email: user.email,
-    };
 
     return res.status(201).json({
       success: true,
       token: token,
       expiresIn: 1200,
       message: messages.registeredSuccessfully,
-      data: result,
+      data: user,
     });
   } catch (error) {
     return handleInternalServerError(res, error);
@@ -96,8 +94,8 @@ export const handleUserSignUp = async (req, res) => {
 
 /**
  * Handle user login process.
- * @param {Object} req - Express request object.
- * @param {Object} res - Express response object.
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
  */
 export const handleUserLogin = async (req, res) => {
   try {
@@ -128,19 +126,12 @@ export const handleUserLogin = async (req, res) => {
       const token = setUser(user);
       res.cookie("token", token);
 
-      const result = {
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-        email: user.email,
-      };
-
       return res.status(200).json({
         success: true,
         token: `${token}`,
         expiresIn: 1200,
         message: messages.loggedIn,
-        data: result,
+        data: user,
       });
     } else {
       return res.status(403).json({
@@ -173,18 +164,10 @@ export const handleUserProfile = async (req, res) => {
       return handleUnauthorizedRequest(res, messages.unauthorizedAccess);
     }
 
-    // Create user JSON object
-    let result = {
-      firstName: user.firstName,
-      lastName: user.lastName,
-      role: user.role,
-      email: user.email,
-    };
-
     return res.status(200).json({
       success: true,
       message: messages.success,
-      data: result,
+      data: user,
     });
   } catch (error) {
     return handleInternalServerError(res, error);
